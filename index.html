@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neon Glass Calculator</title>
+
+<style>
+* { box-sizing: border-box; }
+
+:root {
+  --cyan: #38eaff;
+  --purple: #a78bfa;
+  --bg: #080d19;
+  --panel: #111b30;
+  --key: #1a2942;
+  --text: #f5f8ff;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  padding: 16px 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background:
+    radial-gradient(circle at 15% 10%, #193866 0, transparent 35%),
+    radial-gradient(circle at 90% 90%, #452060 0, transparent 35%),
+    var(--bg);
+  color: var(--text);
+  font-family: Arial, sans-serif;
+}
+
+.app { width: 100%; max-width: 420px; }
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.logo {
+  color: var(--cyan);
+  font-weight: 900;
+  letter-spacing: 2px;
+  font-size: 18px;
+}
+
+.sub {
+  color: #8192b2;
+  font-size: 10px;
+  margin-top: 5px;
+  letter-spacing: 1px;
+}
+
+.mode {
+  border: 1px solid #344868;
+  color: var(--cyan);
+  background: #17253c;
+  border-radius: 10px;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.calculator {
+  background: rgba(17, 27, 48, .96);
+  border: 1px solid #344b70;
+  border-radius: 25px;
+  padding: 16px;
+  box-shadow: 0 15px 45px #0008, 0 0 25px #38eaff12;
+}
+
+.display {
+  min-height: 130px;
+  padding: 12px 6px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+}
+
+.expression {
+  min-height: 25px;
+  color: #8b9bb8;
+  text-align: right;
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+
+.result {
+  min-height: 48px;
+  margin-top: 8px;
+  color: white;
+  font-size: clamp(30px, 9vw, 43px);
+  font-weight: bold;
+  text-align: right;
+  overflow-wrap: anywhere;
+  text-shadow: 0 0 16px #38eaff25;
+}
+
+.science {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 7px;
+  margin-bottom: 10px;
+}
+
+.keys {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 9px;
+}
+
+button.key {
+  height: 53px;
+  border: 1px solid #ffffff0c;
+  border-radius: 14px;
+  background: var(--key);
+  color: var(--text);
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .08s, filter .08s;
+}
+
+button.key:active {
+  transform: scale(.93);
+  filter: brightness(1.4);
+}
+
+button.sci {
+  height: 40px;
+  border-radius: 10px;
+  font-size: 12px;
+  background: #292347;
+  color: #d2c8ff;
+}
+
+button.op {
+  background: #15334a;
+  color: var(--cyan);
+}
+
+button.clear {
+  background: #442237;
+  color: #ff9db5;
+}
+
+button.equal {
+  color: #071421;
+  background: linear-gradient(135deg, var(--cyan), #8a9bff);
+  border: none;
+  box-shadow: 0 0 18px #38eaff20;
+}
+
+.zero { grid-column: span 2; }
+
+.bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 13px;
+  color: #7182a0;
+  font-size: 10px;
+}
+
+.history-panel {
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid #344b70;
+  border-radius: 16px;
+  background: var(--panel);
+}
+
+.history-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+.history-head button {
+  border: 0;
+  border-radius: 8px;
+  padding: 8px;
+  background: #263754;
+  color: white;
+}
+
+.history-item {
+  width: 100%;
+  display: block;
+  text-align: right;
+  border: 0;
+  border-bottom: 1px solid #ffffff12;
+  background: transparent;
+  color: var(--cyan);
+  padding: 10px 2px;
+  font-size: 15px;
+}
+
+.history-item span {
+  display: block;
+  color: #91a0bc;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+@media (max-width: 350px) {
+  .calculator { padding: 11px; }
+  .keys { gap: 6px; }
+  button.key { height: 48px; }
+  .science { gap: 4px; }
+  button.sci { font-size: 10px; }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+  <div class="header">
+    <div>
+      <div class="logo">NEON CALC</div>
+      <div class="sub">SMART SCIENTIFIC EDITION</div>
+    </div>
+    <button class="mode" id="angle">DEG</button>
+  </div>
+
+  <div class="calculator">
+    <div class="display">
+      <div class="expression" id="expression">Kalkulator siap</div>
+      <div class="result" id="result">0</div>
+    </div>
+
+    <div class="science">
+      <button class="key sci" data-insert="sin(">sin</button>
+      <button class="key sci" data-insert="cos(">cos</button>
+      <button class="key sci" data-insert="tan(">tan</button>
+      <button class="key sci" data-insert="log(">log</button>
+      <button class="key sci" data-insert="ln(">ln</button>
+
+      <button class="key sci" data-insert="sqrt(">√</button>
+      <button class="key sci" data-action="square">x²</button>
+      <button class="key sci" data-insert="^">xʸ</button>
+      <button class="key sci" data-insert="abs(">abs</button>
+      <button class="key sci" data-insert="pi">π</button>
+
+      <button class="key sci" data-insert="e">e</button>
+      <button class="key sci" data-action="reciprocal">1/x</button>
+      <button class="key sci" data-insert="(">(</button>
+      <button class="key sci" data-insert=")">)</button>
+      <button class="key sci" data-action="backspace">⌫</button>
+    </div>
+
+    <div class="keys">
+      <button class="key clear" data-action="clear">AC</button>
+      <button class="key clear" data-action="sign">±</button>
+      <button class="key op" data-action="percent">%</button>
+      <button class="key op" data-insert="/">÷</button>
+
+      <button class="key" data-insert="7">7</button>
+      <button class="key" data-insert="8">8</button>
+      <button class="key" data-insert="9">9</button>
+      <button class="key op" data-insert="*">×</button>
+
+      <button class="key" data-insert="4">4</button>
+      <button class="key" data-insert="5">5</button>
+      <button class="key" data-insert="6">6</button>
+      <button class="key op" data-insert="-">−</button>
+
+      <button class="key" data-insert="1">1</button>
+      <button class="key" data-insert="2">2</button>
+      <button class="key" data-insert="3">3</button>
+      <button class="key op" data-insert="+">+</button>
+
+      <button class="key" data-action="sign">±</button>
+      <button class="key zero" data-insert="0">0</button>
+      <button class="key" data-action="decimal">.</button>
+      <button class="key equal" data-action="equals">=</button>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <span>NEON ENGINE • OFFLINE</span>
+    <span>HISTORY: <b id="count">0</b></span>
+  </div>
+
+  <div class="history-panel" id="historyPanel" hidden>
+    <div class="history-head">
+      <b>RIWAYAT HITUNGAN</b>
+      <button id="clearHistory">Hapus semua</button>
+    </div>
+    <div id="historyList"></div>
+  </div>
+
+  <div style="text-align:center;margin-top:12px">
+    <button class="mode" id="historyToggle">◷ Lihat riwayat</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const expressionEl = $("expression");
+  const resultEl = $("result");
+
+  let expression = "";
+  let lastAnswer = null;
+  let justCalculated = false;
+  let angleMode = "DEG";
+  let history = [];
+
+  // Parser matematika tanpa eval(), agar input lebih aman.
+  function calculate(input) {
+    const s = input.replace(/\s/g, "");
+    let i = 0;
+
+    function peek() { return s[i] || ""; }
+    function eat(c) {
+      if (peek() === c) { i++; return true; }
+      return false;
+    }
+
+    function parseNumber() {
+      const start = i;
+      let dots = 0;
+
+      while (/[0-9.]/.test(peek()) && peek() !== "") {
+        if (peek() === ".") dots++;
+        i++;
+      }
+
+      if (start === i || dots > 1) throw Error("Angka tidak valid");
+
+      const n = Number(s.slice(start, i));
+      if (!Number.isFinite(n)) throw Error("Angka tidak valid");
+      return n;
+    }
+
+    function primary() {
+      if (eat("(")) {
+        const n = addSub();
+        if (!eat(")")) throw Error("Kurung belum lengkap");
+        return n;
+      }
+
+      if (/[0-9.]/.test(peek()) && peek() !== "") {
+        return parseNumber();
+      }
+
+      if (/[a-z]/i.test(peek())) {
+        const start = i;
+        while (/[a-z]/i.test(peek()) && peek() !== "") i++;
+        const name = s.slice(start, i).toLowerCase();
+
+        if (name === "pi") return Math.PI;
+        if (name === "e") return Math.E;
+
+        if (!eat("(")) throw Error("Gunakan tanda kurung");
+
+        const x = addSub();
+        if (!eat(")")) throw Error("Kurung belum lengkap");
+
+        switch (name) {
+          case "sqrt":
+            if (x < 0) throw Error("Akar negatif tidak real");
+            return Math.sqrt(x);
+          case "abs": return Math.abs(x);
+          case "log":
+            if (x <= 0) throw Error("Log harus positif");
+            return Math.log10(x);
+          case "ln":
+            if (x <= 0) throw Error("Ln harus positif");
+            return Math.log(x);
+          case "sin":
+            return Math.sin(angleMode === "DEG" ? x * Math.PI / 180 : x);
+          case "cos":
+            return Math.cos(angleMode === "DEG" ? x * Math.PI / 180 : x);
+          case "tan": {
+            const a = angleMode === "DEG" ? x * Math.PI / 180 : x;
+            if (Math.abs(Math.cos(a)) < 1e-12) {
+              throw Error("Tan tidak terdefinisi");
+            }
+            return Math.tan(a);
+          }
+          default: throw Error("Fungsi tidak dikenal");
+        }
+      }
+
+      throw Error("Masukkan angka");
+    }
+
+    function unary() {
+      if (eat("+")) return unary();
+      if (eat("-")) return -unary();
+      return primary();
+    }
+
+    function power() {
+      let n = unary();
+      if (eat("^")) n = Math.pow(n, power());
+      return n;
+    }
+
+    function percentage() {
+      let n = power();
+      while (eat("%")) n /= 100;
+      return n;
+    }
+
+    function multiplyDivide() {
+      let n = percentage();
+
+      while (true) {
+        if (eat("*")) n *= percentage();
+        else if (eat("/")) {
+          const d = percentage();
+          if (d === 0) throw Error("Tidak bisa membagi dengan nol");
+          n /= d;
+        } else break;
+
+        if (!Number.isFinite(n)) throw Error("Hasil tidak valid");
+      }
+
+      return n;
+    }
+
+    function addSub() {
+      let n = multiplyDivide();
+
+      while (true) {
+        if (eat("+")) n += multiplyDivide();
+        else if (eat("-")) n -= multiplyDivide();
+        else break;
+
+        if (!Number.isFinite(n)) throw Error("Hasil terlalu besar");
+      }
+
+      return n;
+    }
+
+    if (!s) throw Error("Masukkan angka");
+    const answer = addSub();
+
+    if (i !== s.length) throw Error("Periksa ekspresi");
+    if (!Number.isFinite(answer)) throw Error("Hasil tidak valid");
+
+    return answer;
+  }
+
+  function pretty(n) {
+    if (!Number.isFinite(n)) throw Error("Hasil tidak valid");
+    if (Object.is(n, -0)) n = 0;
+
+    if (Math.abs(n) >= 1e12 || (Math.abs(n) > 0 && Math.abs(n) < 1e-8)) {
+      return n.toExponential(6);
+    }
+
+    return Number(n.toPrecision(11)).toLocaleString("en-US", {
+      maximumFractionDigits: 10,
+      useGrouping: true
+    });
+  }
+
+  function showExpression() {
+    expressionEl.textContent = expression
+      ? expression.replace(/\*/g, "×").replace(/\//g, "÷")
+      : "Kalkulator siap";
+
+    resultEl.style.color = "white";
+    resultEl.style.fontSize = "";
+  }
+
+  // Hasil pratinjau diperbarui setiap tombol ditekan.
+  function update() {
+    showExpression();
+
+    if (!expression) {
+      resultEl.textContent = "0";
+      return;
+    }
+
+    try {
+      resultEl.textContent = pretty(calculate(expression));
+    } catch (_) {
+      resultEl.textContent = "…";
+    }
+  }
+
+  function insert(value) {
+    if (justCalculated) {
+      if (/^[0-9.]$/.test(value) || value === "pi" ||
+          value === "e" || value === "(" ||
+          /^[a-z]+\($/i.test(value)) {
+        expression = "";
+      }
+      justCalculated = false;
+    }
+
+    expression += value;
+    update();
+  }
+
+  function equals() {
+    if (!expression) return;
+
+    try {
+      const original = expression;
+      const answer = calculate(expression);
+      const formatted = pretty(answer);
+
+      history.unshift({ expression: original, answer: formatted });
+      history = history.slice(0, 30);
+      renderHistory();
+
+      expressionEl.textContent =
+        original.replace(/\*/g, "×").replace(/\//g, "÷") + " =";
+      resultEl.textContent = formatted;
+
+      expression = String(answer);
+      lastAnswer = answer;
+      justCalculated = true;
+    } catch (error) {
+      resultEl.textContent = error.message || "Periksa hitungan";
+      resultEl.style.color = "#ff91aa";
+      resultEl.style.fontSize = "17px";
+    }
+  }
+
+  function unaryAction(type) {
+    if (!expression) return;
+
+    try {
+      const n = calculate(expression);
+      let answer;
+
+      if (type === "square") answer = n * n;
+      if (type === "reciprocal") {
+        if (n === 0) throw Error("Tidak bisa membagi dengan nol");
+        answer = 1 / n;
+      }
+      if (type === "sign") answer = -n;
+
+      if (!Number.isFinite(answer)) throw Error("Hasil tidak valid");
+
+      expression = String(answer);
+      justCalculated = false;
+      update();
+    } catch (error) {
+      resultEl.textContent = error.message;
+      resultEl.style.color = "#ff91aa";
+    }
+  }
+
+  function renderHistory() {
+    $("count").textContent = history.length;
+    const list = $("historyList");
+    list.replaceChildren();
+
+    if (!history.length) {
+      const empty = document.createElement("div");
+      empty.style.color = "#8291ac";
+      empty.textContent = "Belum ada hitungan.";
+      list.appendChild(empty);
+      return;
+    }
+
+    history.forEach(item => {
+      const button = document.createElement("button");
+      button.className = "history-item";
+
+      const label = document.createElement("span");
+      label.textContent = item.expression.replace(/\*/g, "×")
+        .replace(/\//g, "÷");
+
+      const answer = document.createElement("b");
+      answer.textContent = "= " + item.answer;
+
+      button.append(label, answer);
+      button.addEventListener("click", () => {
+        expression = String(item.answer).replace(/,/g, "");
+        justCalculated = true;
+        update();
+      });
+
+      list.appendChild(button);
+    });
+  }
+
+  document.querySelectorAll("[data-insert]").forEach(button => {
+    button.addEventListener("click", () => insert(button.dataset.insert));
+  });
+
+  document.querySelectorAll("[data-action]").forEach(button => {
+    button.addEventListener("click", () => {
+      const action = button.dataset.action;
+
+      if (action === "clear") {
+        expression = "";
+        justCalculated = false;
+        update();
+      }
+
+      if (action === "backspace") {
+        if (justCalculated) {
+          expression = "";
+          justCalculated = false;
+        } else {
+          expression = expression.slice(0, -1);
+        }
+        update();
+      }
+
+      if (action === "equals") equals();
+      if (action === "square") unaryAction("square");
+      if (action === "reciprocal") unaryAction("reciprocal");
+      if (action === "sign") unaryAction("sign");
+
+      if (action === "percent" && expression) {
+        expression += "%";
+        justCalculated = false;
+        update();
+      }
+
+      if (action === "decimal") {
+        if (justCalculated) {
+          expression = "";
+          justCalculated = false;
+        }
+
+        const part = expression.split(/[+\-*/^()%]/).pop();
+        if (!part.includes(".")) {
+          expression += part ? "." : "0.";
+        }
+        update();
+      }
+    });
+  });
+
+  $("angle").addEventListener("click", () => {
+    angleMode = angleMode === "DEG" ? "RAD" : "DEG";
+    $("angle").textContent = angleMode;
+    update();
+  });
+
+  $("historyToggle").addEventListener("click", () => {
+    $("historyPanel").hidden = !$("historyPanel").hidden;
+  });
+
+  $("clearHistory").addEventListener("click", () => {
+    history = [];
+    renderHistory();
+  });
+
+  document.addEventListener("keydown", event => {
+    const k = event.key;
+
+    if (/^[0-9]$/.test(k)) insert(k);
+    else if (k === ".") {
+      if (justCalculated) {
+        expression = "";
+        justCalculated = false;
+      }
+      const part = expression.split(/[+\-*/^()%]/).pop();
+      if (!part.includes(".")) expression += part ? "." : "0.";
+      update();
+    }
+    else if (["+", "-", "*", "/", "^"].includes(k)) insert(k);
+    else if (k === "(" || k === ")") insert(k);
+    else if (k === "%") insert("%");
+    else if (k === "Enter" || k === "=") equals();
+    else if (k === "Backspace") {
+      expression = expression.slice(0, -1);
+      justCalculated = false;
+      update();
+    }
+    else if (k === "Escape") {
+      expression = "";
+      justCalculated = false;
+      update();
+    }
+  });
+
+  update();
+})();
+</script>
+</body>
+</html>
